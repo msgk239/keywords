@@ -36,6 +36,10 @@
         "title": "检查Word文档错别字"
       },
       {
+        "command": "chinese-typo-checker.exportToDocx",
+        "title": "导出为Word文档"
+      },
+      {
         "command": "chinese-typo-checker.importTypoDictionary",
         "title": "导入错别字文件"
       },
@@ -81,6 +85,11 @@
         {
           "command": "chinese-typo-checker.checkDocx",
           "group": "chinese-typo-checker"
+        },
+        {
+          "command": "chinese-typo-checker.exportToDocx",
+          "group": "chinese-typo-checker",
+          "when": "resourceExtname == .txt"
         }
       ],
       "view/title": [

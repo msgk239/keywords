@@ -12,8 +12,36 @@ export class DocxHandler {
      */
     public async convertDocxToText(filePath: string): Promise<string> {
         try {
-            const result = await mammoth.extractRawText({ path: filePath });
-            return result.value;
+            // 使用HTML转换可以保留更多格式信息
+            const result = await mammoth.convertToHtml({ path: filePath });
+            let html = result.value;
+            
+            // 处理HTML，转换为格式化的纯文本
+            // 将<p>标签替换为段落（双换行）
+            html = html.replace(/<p[^>]*>(.*?)<\/p>/g, '$1\n\n');
+            
+            // 将<br>标签替换为单个换行
+            html = html.replace(/<br\s*\/?>/g, '\n');
+            
+            // 移除所有其他HTML标签
+            html = html.replace(/<[^>]*>/g, '');
+            
+            // 解码HTML实体
+            html = html.replace(/&nbsp;/g, ' ')
+                       .replace(/&amp;/g, '&')
+                       .replace(/&lt;/g, '<')
+                       .replace(/&gt;/g, '>')
+                       .replace(/&quot;/g, '"');
+            
+            // 移除多余的空行（超过2个换行符的情况）
+            html = html.replace(/\n{3,}/g, '\n\n');
+            
+            // 确保文本以新行结束
+            if (!html.endsWith('\n')) {
+                html += '\n';
+            }
+            
+            return html;
         } catch (error: any) {
             throw new Error(`无法转换 DOCX 文件: ${error.message}`);
         }
@@ -63,18 +91,47 @@ export class DocxHandler {
             const dir = path.dirname(originalDocxPath);
             const newDocxPath = path.join(dir, `${originalFileName}_已修正.docx`);
             
+            // 处理段落
+            const paragraphs = content.split('\n\n').map(paragraph => {
+                // 处理段落内的换行
+                const lines = paragraph.split('\n').filter(line => line.trim());
+                return new Paragraph({
+                    children: lines.map(line => 
+                        new TextRun({
+                            text: line,
+                            size: 24, // 12pt
+                            font: '宋体'
+                        })
+                    ),
+                    spacing: {
+                        after: 200, // 段落间距
+                        line: 360 // 行间距
+                    }
+                });
+            });
+
             // 创建新的Word文档
             const doc = new Document({
                 sections: [{
                     properties: {},
-                    children: content.split('\n').map(line => 
-                        new Paragraph({
-                            children: [
-                                new TextRun(line)
-                            ]
-                        })
-                    )
-                }]
+                    children: paragraphs
+                }],
+                styles: {
+                    default: {
+                        document: {
+                            run: {
+                                font: '宋体',
+                                size: 24
+                            },
+                            paragraph: {
+                                spacing: {
+                                    after: 200,
+                                    line: 360
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
             // 保存文档

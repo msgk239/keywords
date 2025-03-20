@@ -181,34 +181,28 @@ export function activate(context: vscode.ExtensionContext) {
                     // 检查错别字
                     const typos = typoChecker.checkText(text);
                     
+                    // 保存原始docx路径到工作区状态
+                    context.workspaceState.update('originalDocxPath', filePath);
+                    
                     // 打开临时文件
                     const uri = vscode.Uri.file(tempFilePath);
                     const doc = await vscode.window.showTextDocument(uri);
                     
-                    // 更新错别字列表
-                    typoListView.updateTypos(typos.map(typo => ({
-                        ...typo,
-                        line: 0, // 临时文件中的行号
-                        column: 0, // 临时文件中的列号
-                        range: new vscode.Range(0, 0, 0, 0) // 临时范围
-                    })));
+                    // 自动检查错别字并显示
+                    const fullRange = new vscode.Range(
+                        doc.document.positionAt(0),
+                        doc.document.positionAt(doc.document.getText().length)
+                    );
+                    
+                    // 更新错别字列表（使用实际行号）
+                    const documentTypos = typoChecker.checkDocument(doc.document);
+                    typoListView.updateTypos(documentTypos);
                     
                     // 显示错别字列表
                     await vscode.commands.executeCommand('workbench.view.extension.chinese-typo-checker-view');
                     
                     if (typos.length > 0) {
                         vscode.window.showInformationMessage(`发现 ${typos.length} 个错别字，请在临时文件中修改`);
-                        
-                        // 添加导出按钮
-                        const exportButton = await vscode.window.showInformationMessage(
-                            '修改完成后，可以导出为新的Word文档',
-                            '导出为Word文档'
-                        );
-                        
-                        if (exportButton === '导出为Word文档') {
-                            const newDocxPath = await docxHandler.exportToDocx(doc.document.getText(), filePath);
-                            vscode.window.showInformationMessage(`已导出到: ${newDocxPath}`);
-                        }
                     } else {
                         vscode.window.showInformationMessage('未发现错别字');
                     }
@@ -216,6 +210,36 @@ export function activate(context: vscode.ExtensionContext) {
                 
             } catch (error: any) {
                 vscode.window.showErrorMessage(`检查Word文档失败: ${error.message}`);
+            }
+        }),
+        
+        // 导出为Word文档
+        vscode.commands.registerCommand('chinese-typo-checker.exportToDocx', async () => {
+            try {
+                const editor = vscode.window.activeTextEditor;
+                if (!editor) {
+                    vscode.window.showErrorMessage('没有打开的编辑器');
+                    return;
+                }
+                
+                // 获取原始docx路径
+                const originalDocxPath = context.workspaceState.get<string>('originalDocxPath');
+                if (!originalDocxPath) {
+                    vscode.window.showErrorMessage('无法找到原始Word文档路径');
+                    return;
+                }
+                
+                // 显示进度
+                await vscode.window.withProgress({
+                    location: vscode.ProgressLocation.Notification,
+                    title: "正在导出Word文档",
+                }, async (progress) => {
+                    // 导出为新的Word文档
+                    const newDocxPath = await docxHandler.exportToDocx(editor.document.getText(), originalDocxPath);
+                    vscode.window.showInformationMessage(`已导出到: ${newDocxPath}`);
+                });
+            } catch (error: any) {
+                vscode.window.showErrorMessage(`导出Word文档失败: ${error.message}`);
             }
         })
     );

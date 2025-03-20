@@ -11,6 +11,7 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
     private typos: TypoItem[] = [];
     private selectedItems: Set<string> = new Set();
     private treeView: vscode.TreeView<TypoItem>;
+    private itemIdMap: Map<string, TypoItem> = new Map();
 
     constructor(private context: vscode.ExtensionContext) {
         // 注册视图
@@ -41,7 +42,12 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
             if (e.visible) {
                 // 当视图可见时，仅显示第一个错别字，但不自动选择
                 if (this.typos.length > 0) {
-                    this.treeView.reveal(this.typos[0], { select: false });
+                    // 延迟显示，避免树视图还未准备好
+                    setTimeout(() => {
+                        if (this.typos.length > 0) {
+                            this.treeView.reveal(this.typos[0], { select: false, focus: false });
+                        }
+                    }, 100);
                 }
             }
         });
@@ -58,11 +64,19 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
      * 获取树节点
      */
     getTreeItem(element: TypoItem): vscode.TreeItem {
-        const isSelected = this.selectedItems.has(this.getItemKey(element));
+        const key = this.getItemKey(element);
+        const isSelected = this.selectedItems.has(key);
+        
+        // 使用固定的label，避免每次渲染时生成不同的标签
+        const label = `${element.original} → ${element.suggestion} (第 ${element.line} 行)`;
+        
         const treeItem = new vscode.TreeItem(
-            `${element.original} → ${element.suggestion} (第 ${element.line} 行)`,
+            label,
             vscode.TreeItemCollapsibleState.None
         );
+        
+        // 设置唯一ID
+        treeItem.id = key;
         
         // 点击时切换选择状态并显示详情
         treeItem.command = {
@@ -71,12 +85,10 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
             arguments: [element]
         };
 
-        // 添加图标但不用对号
+        // 只使用图标而不是description
         treeItem.contextValue = isSelected ? 'selected' : 'unselected';
         treeItem.iconPath = isSelected ? new vscode.ThemeIcon('check') : undefined;
         treeItem.tooltip = `${element.original} → ${element.suggestion}\n第 ${element.line} 行，第 ${element.column} 列\n点击选择或取消`;
-        // 不使用description显示对号
-        // treeItem.description = `${isSelected ? '✓' : ''}`;
 
         return treeItem;
     }
@@ -102,11 +114,23 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
      */
     public updateTypos(typos: TypoItem[]): void {
         this.typos = typos;
+        
+        // 更新ID映射
+        this.itemIdMap.clear();
+        typos.forEach(item => {
+            this.itemIdMap.set(this.getItemKey(item), item);
+        });
+        
         this._onDidChangeTreeData.fire();
         
         // 如果有错别字，显示第一个但不自动选择
         if (typos.length > 0) {
-            this.treeView.reveal(typos[0], { select: false });
+            // 先防范性延迟一下再reveal，让树视图有时间更新
+            setTimeout(() => {
+                if (this.typos.length > 0) {
+                    this.treeView.reveal(this.typos[0], { select: false, focus: false });
+                }
+            }, 100);
         }
     }
 
@@ -121,7 +145,11 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
         
         // 如果有错别字，更新显示但不自动选择
         if (this.typos.length > 0) {
-            this.treeView.reveal(this.typos[0], { select: false });
+            setTimeout(() => {
+                if (this.typos.length > 0) {
+                    this.treeView.reveal(this.typos[0], { select: false, focus: false });
+                }
+            }, 100);
         }
     }
 
@@ -211,8 +239,13 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
             editor.selection = new vscode.Selection(typo.range.start, typo.range.end);
         }
         
-        // 在列表中高亮该项，并设置为选中状态
-        this.treeView.reveal(typo, { select: true, focus: true });
+        // 在列表中高亮该项，确保安全使用
+        setTimeout(() => {
+            // 确保项目仍然存在
+            if (this.typos.includes(typo)) {
+                this.treeView.reveal(typo, { select: true, focus: true });
+            }
+        }, 100);
     }
 
     /**
@@ -226,5 +259,14 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
             editor.revealRange(typo.range, vscode.TextEditorRevealType.InCenter);
             editor.selection = new vscode.Selection(typo.range.start, typo.range.end);
         }
+    }
+
+    /**
+     * 确保项目存在于映射中
+     * @param key 项目键
+     * @returns 对应的项目或undefined
+     */
+    private getItemByKey(key: string): TypoItem | undefined {
+        return this.itemIdMap.get(key);
     }
 } 

@@ -1,0 +1,205 @@
+{
+  "name": "chinese-typo-checker",
+  "displayName": "中文错别字检查",
+  "description": "检查和自动修正中文文档中的错别字",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/chinese-typo-checker"
+  },
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Linters"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "chinese-typo-checker.checkDocument",
+        "title": "检查中文错别字"
+      },
+      {
+        "command": "chinese-typo-checker.fixAllTypos",
+        "title": "修正所有错别字"
+      },
+      {
+        "command": "chinese-typo-checker.importTypoDictionary",
+        "title": "导入错别字文件"
+      },
+      {
+        "command": "chinese-typo-checker.exportTypoDictionary",
+        "title": "导出错别字规则"
+      },
+      {
+        "command": "chinese-typo-checker.importRules",
+        "title": "导入错别字规则"
+      },
+      {
+        "command": "chinese-typo-checker.exportRules",
+        "title": "导出错别字规则"
+      },
+      {
+        "command": "chinese-typo-checker.openDictionary",
+        "title": "打开错别字映射表"
+      },
+      {
+        "command": "chinese-typo-checker.showTypoList",
+        "title": "显示错别字列表"
+      },
+      {
+        "command": "chinese-typo-checker.showTypoDetail",
+        "title": "显示错别字详情"
+      },
+      {
+        "command": "chinese-typo-checker.applySelected",
+        "title": "应用选中的错别字修改"
+      },
+      {
+        "command": "chinese-typo-checker.selectAll",
+        "title": "全选错别字"
+      },
+      {
+        "command": "chinese-typo-checker.deselectAll",
+        "title": "取消全选错别字"
+      },
+      {
+        "command": "chinese-typo-checker.toggleSelection",
+        "title": "切换选择状态"
+      },
+      {
+        "command": "chinese-typo-checker.toggleAndShowDetail",
+        "title": "切换选择并显示详情"
+      },
+      {
+        "command": "chinese-typo-checker.addCustomRule",
+        "title": "添加自定义错别字规则"
+      },
+      {
+        "command": "chinese-typo-checker.exportCustomRules",
+        "title": "导出自定义错别字规则"
+      },
+      {
+        "command": "chinese-typo-checker.importCustomRules",
+        "title": "导入自定义错别字规则"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "chinese-typo-checker.checkDocument",
+          "group": "chinese-typo-checker"
+        },
+        {
+          "command": "chinese-typo-checker.fixAllTypos",
+          "group": "chinese-typo-checker"
+        },
+        {
+          "command": "chinese-typo-checker.showTypoList",
+          "group": "chinese-typo-checker"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "chinese-typo-checker.applySelected",
+          "when": "view == chineseTypos",
+          "group": "navigation"
+        },
+        {
+          "command": "chinese-typo-checker.selectAll",
+          "when": "view == chineseTypos",
+          "group": "navigation"
+        },
+        {
+          "command": "chinese-typo-checker.deselectAll",
+          "when": "view == chineseTypos",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "中文错别字检查",
+      "properties": {
+        "chinese-typo-checker.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否启用错别字检查"
+        },
+        "chinese-typo-checker.customRules": {
+          "type": "array",
+          "default": [],
+          "description": "自定义错别字规则",
+          "items": {
+            "type": "object",
+            "properties": {
+              "original": {
+                "type": "string",
+                "description": "错别字"
+              },
+              "suggestion": {
+                "type": "string",
+                "description": "建议修改为"
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "是否启用该规则",
+                "default": true
+              }
+            },
+            "required": ["original", "suggestion"]
+          }
+        },
+        "chinese-typo-checker.highlight.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否高亮显示错别字"
+        },
+        "chinese-typo-checker.highlight.color": {
+          "type": "string",
+          "default": "#FF0000",
+          "description": "错别字高亮颜色"
+        }
+      }
+    },
+    "views": {
+      "chinese-typo-checker-view": [
+        {
+          "id": "chineseTypos",
+          "name": "中文错别字列表"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "chinese-typo-checker-view",
+          "title": "中文错别字检查",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "mammoth": "^1.9.0"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.3",
+    "@types/node": "^16.11.7",
+    "@types/vscode": "^1.60.0",
+    "glob": "^7.1.7",
+    "typescript": "^4.5.2",
+    "vscode-test": "^1.5.2"
+  }
+}

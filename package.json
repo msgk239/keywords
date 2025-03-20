@@ -2,7 +2,7 @@
   "name": "chinese-typo-checker",
   "displayName": "中文错别字检查",
   "description": "检查和自动修正中文文档中的错别字",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/yourusername/chinese-typo-checker"

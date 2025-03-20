@@ -167,12 +167,8 @@ export function activate(context: vscode.ExtensionContext) {
             await vscode.window.showTextDocument(uri, { preview: false, preserveFocus: false, viewColumn: vscode.ViewColumn.Active });
             
             // 设置为只读模式
-            vscode.window.activeTextEditor?.edit(editBuilder => {
-                // 只是为了触发编辑操作
-            }).then(() => {
-                // 添加只读标记
-                vscode.commands.executeCommand('workbench.action.toggleReadOnlyMode');
-                
+            try {
+                await vscode.workspace.fs.stat(uri);
                 // 显示提示信息
                 vscode.window.showInformationMessage(
                     '默认错别字映射表为只读。若要修改规则，请复制到自定义映射表中。',
@@ -187,7 +183,9 @@ export function activate(context: vscode.ExtensionContext) {
                         );
                     }
                 });
-            });
+            } catch (error) {
+                vscode.window.showErrorMessage(`无法访问错别字映射表: ${error}`);
+            }
         } catch (error: any) {
             vscode.window.showErrorMessage(`打开错别字映射表失败: ${error.message}`);
         }
@@ -298,19 +296,6 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // 注册视图标题栏命令
-    const applySelectedCommand = vscode.commands.registerCommand('chinese-typo-checker.applySelected', () => {
-        typoListView.applySelected();
-    });
-
-    const selectAllCommand = vscode.commands.registerCommand('chinese-typo-checker.selectAll', () => {
-        typoListView.selectAll();
-    });
-
-    const deselectAllCommand = vscode.commands.registerCommand('chinese-typo-checker.deselectAll', () => {
-        typoListView.deselectAll();
-    });
-
     // 注册 Webview 消息处理
     context.subscriptions.push(
         vscode.commands.registerCommand('chinese-typo-checker.replaceText', async (original: string, suggestion: string) => {
@@ -338,10 +323,7 @@ export function activate(context: vscode.ExtensionContext) {
         openDictionaryCommand,
         openCustomDictionaryCommand,
         exportTypoDictionaryCommand,
-        toggleDefaultRulesCommand,
-        applySelectedCommand,
-        selectAllCommand,
-        deselectAllCommand
+        toggleDefaultRulesCommand
     );
 }
 

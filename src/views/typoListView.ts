@@ -46,22 +46,6 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
             vscode.commands.registerCommand('chinese-typo-checker.toggleAndShowDetail', (node: TypoItemNode) => this.toggleAndShowDetail(node)),
             vscode.commands.registerCommand('chinese-typo-checker.deselectItem', (node: TypoItemNode) => this.deselectItem(node))
         );
-
-        // 监听视图可见性变化
-        this.treeView.onDidChangeVisibility(e => {
-            if (e.visible && this.nodes.length > 0) {
-                // 避免立即显示，给视图一些时间进行初始化
-                setTimeout(() => {
-                    if (this.nodes.length > 0) {
-                        try {
-                            this.treeView.reveal(this.nodes[0], { select: false, focus: false });
-                        } catch (error) {
-                            console.error('无法显示第一个错别字项:', error);
-                        }
-                    }
-                }, 300);
-            }
-        });
     }
 
     /**
@@ -134,40 +118,8 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
             
             // 通知树视图更新
             this._onDidChangeTreeData.fire();
-            
-            // 如果有错别字，等待更长时间再尝试显示第一个
-            if (this.nodes.length > 0) {
-                // 使用更长的延迟，确保树视图完全更新
-                setTimeout(() => {
-                    this.safeRevealNode(this.nodes[0]);
-                }, 500);
-            }
         } catch (error) {
             console.error('更新错别字列表时出错:', error);
-        }
-    }
-
-    /**
-     * 安全地显示节点，包含错误处理
-     */
-    private safeRevealNode(node: TypoItemNode, select: boolean = false): void {
-        try {
-            // 确保节点在列表中
-            if (!this.nodes.includes(node)) {
-                return;
-            }
-            
-            // 使用reveal显示节点
-            this.treeView.reveal(node, {
-                select: select,
-                focus: select,
-                expand: true
-            }).then(undefined, error => {
-                // 处理reveal错误
-                console.error('无法显示节点:', error);
-            });
-        } catch (error) {
-            console.error('显示节点时出错:', error);
         }
     }
 
@@ -234,10 +186,11 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
             
             vscode.window.showInformationMessage(`已修改 ${selectedNodes.length} 个错别字`);
             
-            // 清空错别字列表
-            this.nodes = [];
-            this.nodeMap.clear();
-            this._onDidChangeTreeData.fire();
+            // 使用短暂延迟再触发文档重新检查
+            // 这可以确保编辑操作完全完成再进行检查
+            setTimeout(() => {
+                vscode.commands.executeCommand('chinese-typo-checker.checkDocument');
+            }, 100);
         } catch (error) {
             console.error('应用选中的错别字修改时出错:', error);
             vscode.window.showErrorMessage('修改错别字时出错');
@@ -298,11 +251,6 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
                 editor.revealRange(node.typo.range, vscode.TextEditorRevealType.InCenter);
                 editor.selection = new vscode.Selection(node.typo.range.start, node.typo.range.end);
             }
-            
-            // 在树视图中显示该节点，使用更长的延迟
-            setTimeout(() => {
-                this.safeRevealNode(node, true);
-            }, 500);
         } catch (error) {
             console.error('切换选择状态并显示详情时出错:', error);
         }
@@ -338,11 +286,6 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
                 editor.revealRange(typo.range, vscode.TextEditorRevealType.InCenter);
                 editor.selection = new vscode.Selection(typo.range.start, typo.range.end);
             }
-            
-            // 在树视图中显示该节点，使用更长的延迟
-            setTimeout(() => {
-                this.safeRevealNode(node!, true);
-            }, 500);
         } catch (error) {
             console.error('显示错别字详情时出错:', error);
         }

@@ -73,6 +73,19 @@ export function activate(context: vscode.ExtensionContext) {
             }
             
             await typoChecker.fixAllTypos(editor.document, editor);
+            
+            // 短暂延迟后再重新检查文档
+            setTimeout(() => {
+                // 修正完成后重新检查文档
+                const typos = typoChecker.checkDocument(editor.document);
+                typoListView.updateTypos(typos);
+                
+                if (typos.length > 0) {
+                    vscode.window.showInformationMessage(`已修正部分错别字，仍有 ${typos.length} 个错别字`);
+                } else {
+                    vscode.window.showInformationMessage('所有错别字已修正');
+                }
+            }, 100);
         }),
         
         // 显示错别字列表

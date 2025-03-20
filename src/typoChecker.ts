@@ -105,6 +105,9 @@ export class TypoChecker {
         
         // 清除诊断信息
         this.clearDiagnostics();
+        
+        // 修复完成后重新检查文档
+        this.checkDocument(document);
     }
     
     /**

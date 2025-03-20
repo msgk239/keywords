@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
     // 注册命令
     context.subscriptions.push(
         // 检查文档
-        vscode.commands.registerCommand('chinese-typo-checker.checkDocument', async () => {
+        vscode.commands.registerCommand('chinese-typo-checker.checkDocument', async (args?: any) => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
                 vscode.window.showErrorMessage('没有打开的编辑器');
@@ -56,6 +56,9 @@ export function activate(context: vscode.ExtensionContext) {
             
             const typos = typoChecker.checkDocument(editor.document);
             typoListView.updateTypos(typos);
+            
+            // 无论从哪里触发都显示列表
+            await vscode.commands.executeCommand('workbench.view.extension.chinese-typo-checker-view');
             
             if (typos.length > 0) {
                 vscode.window.showInformationMessage(`发现 ${typos.length} 个错别字`);
@@ -214,44 +217,6 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // 注册命令：添加自定义错别字规则
-    const addCustomRuleCommand = vscode.commands.registerCommand('chinese-typo-checker.addCustomRule', async () => {
-        try {
-            const original = await vscode.window.showInputBox({
-                prompt: '请输入错别字',
-                placeHolder: '例如：中国'
-            });
-            
-            if (!original) {
-                return;
-            }
-            
-            const suggestion = await vscode.window.showInputBox({
-                prompt: '请输入正确的词',
-                placeHolder: '例如：中国'
-            });
-            
-            if (!suggestion) {
-                return;
-            }
-            
-            // 添加到配置
-            const config = new Configuration();
-            await config.addCustomRule({
-                original,
-                suggestion,
-                enabled: true
-            });
-            
-            // 重新加载规则
-            dictionary.loadFromConfig();
-            
-            vscode.window.showInformationMessage(`已添加自定义规则: ${original} -> ${suggestion}`);
-        } catch (error: any) {
-            vscode.window.showErrorMessage(`添加自定义规则失败: ${error.message}`);
-        }
-    });
-
     // 注册命令：导出错别字文件
     const exportTypoDictionaryCommand = vscode.commands.registerCommand('chinese-typo-checker.exportTypoDictionary', async () => {
         try {
@@ -372,7 +337,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         openDictionaryCommand,
         openCustomDictionaryCommand,
-        addCustomRuleCommand,
         exportTypoDictionaryCommand,
         toggleDefaultRulesCommand,
         applySelectedCommand,

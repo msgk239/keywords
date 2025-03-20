@@ -48,12 +48,8 @@
         "title": "打开自定义错别字映射表"
       },
       {
-        "command": "chinese-typo-checker.addCustomRule",
-        "title": "添加自定义错别字规则"
-      },
-      {
         "command": "chinese-typo-checker.toggleDefaultRules",
-        "title": "切换是否使用默认规则"
+        "title": "切换是否使用错别字默认规则"
       },
       {
         "command": "chinese-typo-checker.applySelected",

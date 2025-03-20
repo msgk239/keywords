@@ -43,15 +43,6 @@ export class Configuration {
     }
 
     /**
-     * 添加自定义错别字规则
-     */
-    public async addCustomRule(rule: TypoRule): Promise<void> {
-        const rules = this.getCustomRules();
-        rules.push(rule);
-        await this.setCustomRules(rules);
-    }
-
-    /**
      * 检查是否启用了高亮显示
      */
     public isHighlightEnabled(): boolean {

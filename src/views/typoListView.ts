@@ -68,7 +68,7 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
         const isSelected = this.selectedItems.has(key);
         
         // 使用固定的label，避免每次渲染时生成不同的标签
-        const label = `${element.original} → ${element.suggestion} (第 ${element.line} 行)`;
+        const label = `${element.original} → ${element.suggestion} (第 ${element.line + 1} 行)`;
         
         const treeItem = new vscode.TreeItem(
             label,
@@ -88,7 +88,7 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
         // 只使用图标而不是description
         treeItem.contextValue = isSelected ? 'selected' : 'unselected';
         treeItem.iconPath = isSelected ? new vscode.ThemeIcon('check') : undefined;
-        treeItem.tooltip = `${element.original} → ${element.suggestion}\n第 ${element.line} 行，第 ${element.column} 列\n点击选择或取消`;
+        treeItem.tooltip = `${element.original} → ${element.suggestion}\n第 ${element.line + 1} 行，第 ${element.column + 1} 列\n点击选择或取消`;
 
         return treeItem;
     }
@@ -113,7 +113,8 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItem> {
      * 更新错别字列表
      */
     public updateTypos(typos: TypoItem[]): void {
-        this.typos = typos;
+        // 按行号排序
+        this.typos = typos.sort((a, b) => a.line - b.line);
         
         // 更新ID映射
         this.itemIdMap.clear();

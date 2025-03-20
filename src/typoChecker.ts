@@ -147,6 +147,33 @@ export class TypoChecker {
     }
     
     /**
+     * 检查纯文本内容中的错别字（用于DOCX文件等）
+     * @param text 要检查的纯文本
+     * @returns 错别字信息数组（不包含range）
+     */
+    public checkText(text: string): Array<{original: string, suggestion: string}> {
+        const result: Array<{original: string, suggestion: string}> = [];
+        const typoMap = this.dictionary.getAllTypos();
+        
+        // 为每个错别字检查文本
+        for (const typo in typoMap) {
+            // 使用正则表达式匹配错别字
+            const regex = new RegExp(typo, 'g');
+            let match;
+            
+            // 查找所有匹配项
+            while ((match = regex.exec(text)) !== null) {
+                result.push({
+                    original: typo,
+                    suggestion: typoMap[typo]
+                });
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
      * 释放资源
      */
     public dispose(): void {

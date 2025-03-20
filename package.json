@@ -32,6 +32,10 @@
         "title": "修正所有错别字"
       },
       {
+        "command": "chinese-typo-checker.checkDocx",
+        "title": "检查Word文档错别字"
+      },
+      {
         "command": "chinese-typo-checker.importTypoDictionary",
         "title": "导入错别字文件"
       },
@@ -72,6 +76,10 @@
         },
         {
           "command": "chinese-typo-checker.fixAllTypos",
+          "group": "chinese-typo-checker"
+        },
+        {
+          "command": "chinese-typo-checker.checkDocx",
           "group": "chinese-typo-checker"
         }
       ],
@@ -127,7 +135,10 @@
                 "default": true
               }
             },
-            "required": ["original", "suggestion"]
+            "required": [
+              "original",
+              "suggestion"
+            ]
           }
         },
         "chinese-typo-checker.highlight.enabled": {
@@ -161,6 +172,7 @@
     }
   },
   "dependencies": {
+    "docx": "^8.5.0",
     "mammoth": "^1.9.0"
   },
   "scripts": {

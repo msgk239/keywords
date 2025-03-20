@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { TypoRule } from './modules/import-export/typoRuleManager';
+import { Configuration } from './configuration';
 
 // 错别字映射接口
 export interface TypoMap {
@@ -20,6 +21,11 @@ export class TypoDictionary {
      * @param filePath 错别字文件路径
      */
     public loadFromFile(filePath: string): void {
+        // 如果设置为不使用默认规则，则不加载
+        if (!Configuration.useDefaultRules()) {
+            return;
+        }
+        
         try {
             const content = fs.readFileSync(filePath, 'utf-8');
             this.parseFileContent(content);
@@ -61,6 +67,58 @@ export class TypoDictionary {
         // 合并自定义规则
         this.rules = this.mergeRules(this.rules, customRules);
         this.updateTypoMap();
+        
+        // 尝试读取自定义错别字文件
+        this.loadFromCustomFile();
+    }
+    
+    /**
+     * 从自定义文件加载错别字映射
+     */
+    private loadFromCustomFile(): void {
+        try {
+            // 用户目录下的自定义错别字文件
+            const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.chinese-typo-checker');
+            const customDictPath = path.join(userFolder, 'customDict.txt');
+            
+            if (fs.existsSync(customDictPath)) {
+                const content = fs.readFileSync(customDictPath, 'utf-8');
+                const customRules = this.parseCustomFileContent(content);
+                
+                // 合并自定义规则（优先级高于默认规则）
+                this.rules = this.mergeRules(this.rules, customRules);
+                this.updateTypoMap();
+            }
+        } catch (error) {
+            console.error('无法加载自定义错别字文件:', error);
+        }
+    }
+    
+    /**
+     * 解析自定义文件内容
+     * @param content 文件内容
+     * @returns 规则列表
+     */
+    private parseCustomFileContent(content: string): TypoRule[] {
+        const lines = content.split('\n');
+        const rules: TypoRule[] = [];
+        
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            // 跳过注释和空行
+            if (trimmedLine && !trimmedLine.startsWith('#') && trimmedLine.includes('：')) {
+                const [typo, correction] = trimmedLine.split('：').map(s => s.trim());
+                if (typo && correction) {
+                    rules.push({
+                        original: typo,
+                        suggestion: correction,
+                        enabled: true
+                    });
+                }
+            }
+        }
+        
+        return rules;
     }
 
     /**
@@ -120,6 +178,14 @@ export class TypoDictionary {
     public setRules(rules: TypoRule[]): void {
         this.rules = rules;
         this.updateTypoMap();
+    }
+    
+    /**
+     * 清空所有规则
+     */
+    public clearRules(): void {
+        this.rules = [];
+        this.typoMap = {};
     }
     
     /**

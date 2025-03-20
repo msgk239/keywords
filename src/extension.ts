@@ -88,6 +88,45 @@ export function activate(context: vscode.ExtensionContext) {
             }, 100);
         }),
         
+        // 导入错别字文件
+        vscode.commands.registerCommand('chinese-typo-checker.importTypoDictionary', async () => {
+            try {
+                const fileUri = await vscode.window.showOpenDialog({
+                    filters: { 'Text Files': ['txt'] },
+                    canSelectMany: false
+                });
+                
+                if (fileUri && fileUri[0]) {
+                    const filePath = fileUri[0].fsPath;
+                    // 用户目录下的自定义错别字文件
+                    const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.chinese-typo-checker');
+                    const customDictPath = path.join(userFolder, 'customDict.txt');
+                    
+                    // 确保目录存在
+                    if (!fs.existsSync(userFolder)) {
+                        fs.mkdirSync(userFolder, { recursive: true });
+                    }
+                    
+                    // 读取选择的文件
+                    const content = fs.readFileSync(filePath, 'utf-8');
+                    
+                    // 追加到自定义错别字文件
+                    fs.appendFileSync(customDictPath, '\n' + content, 'utf-8');
+                    
+                    // 重新加载字典
+                    dictionary.loadFromConfig();
+                    
+                    vscode.window.showInformationMessage(`错别字文件导入成功`);
+                    
+                    // 打开自定义错别字文件
+                    const uri = vscode.Uri.file(customDictPath);
+                    await vscode.window.showTextDocument(uri);
+                }
+            } catch (error: any) {
+                vscode.window.showErrorMessage(`导入错别字文件失败: ${error.message}`);
+            }
+        }),
+        
         // 显示错别字列表
         vscode.commands.registerCommand('chinese-typo-checker.showTypoList', () => {
             vscode.commands.executeCommand('workbench.view.extension.chinese-typo-checker-view');
@@ -117,34 +156,194 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    // 注册命令：导出错别字规则
-    const exportRulesCommand = vscode.commands.registerCommand('chinese-typo-checker.exportRules', async () => {
+    // 注册命令：打开默认错别字映射表
+    const openDictionaryCommand = vscode.commands.registerCommand('chinese-typo-checker.openDictionary', async () => {
         try {
-            const rules = dictionary.getRules();
-            const exportFile = await typoRuleManager.exportRules(rules);
-            vscode.window.showInformationMessage(`规则已导出到: ${exportFile}`);
+            const dictionaryPath = path.join(context.extensionPath, 'resources', 'typoDict.txt');
+            const uri = vscode.Uri.file(dictionaryPath);
+            await vscode.window.showTextDocument(uri, { preview: false, preserveFocus: false, viewColumn: vscode.ViewColumn.Active });
+            
+            // 设置为只读模式
+            vscode.window.activeTextEditor?.edit(editBuilder => {
+                // 只是为了触发编辑操作
+            }).then(() => {
+                // 添加只读标记
+                vscode.commands.executeCommand('workbench.action.toggleReadOnlyMode');
+                
+                // 显示提示信息
+                vscode.window.showInformationMessage(
+                    '默认错别字映射表为只读。若要修改规则，请复制到自定义映射表中。',
+                    '如何修改规则?'
+                ).then(selection => {
+                    if (selection === '如何修改规则?') {
+                        vscode.window.showInformationMessage(
+                            '1. 使用"打开自定义错别字映射表"命令\n' +
+                            '2. 在自定义映射表中添加规则\n' +
+                            '3. 自定义规则会覆盖默认规则\n' +
+                            '4. 格式为: 错别字：正确词'
+                        );
+                    }
+                });
+            });
         } catch (error: any) {
-            vscode.window.showErrorMessage(`导出规则失败: ${error.message}`);
+            vscode.window.showErrorMessage(`打开错别字映射表失败: ${error.message}`);
         }
     });
 
-    // 注册命令：导入错别字规则
-    const importRulesCommand = vscode.commands.registerCommand('chinese-typo-checker.importRules', async () => {
+    // 注册命令：打开自定义错别字映射表
+    const openCustomDictionaryCommand = vscode.commands.registerCommand('chinese-typo-checker.openCustomDictionary', async () => {
         try {
-            const fileUri = await vscode.window.showOpenDialog({
-                filters: { 'JSON Files': ['json'] }
+            // 用户目录下的自定义错别字文件
+            const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.chinese-typo-checker');
+            const customDictPath = path.join(userFolder, 'customDict.txt');
+            
+            // 确保目录存在
+            if (!fs.existsSync(userFolder)) {
+                fs.mkdirSync(userFolder, { recursive: true });
+            }
+            
+            // 如果文件不存在，创建空文件
+            if (!fs.existsSync(customDictPath)) {
+                fs.writeFileSync(customDictPath, '# 自定义错别字映射表\n# 格式：错别字：正确词\n', 'utf-8');
+            }
+            
+            const uri = vscode.Uri.file(customDictPath);
+            await vscode.window.showTextDocument(uri);
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`打开自定义错别字映射表失败: ${error.message}`);
+        }
+    });
+
+    // 注册命令：添加自定义错别字规则
+    const addCustomRuleCommand = vscode.commands.registerCommand('chinese-typo-checker.addCustomRule', async () => {
+        try {
+            const original = await vscode.window.showInputBox({
+                prompt: '请输入错别字',
+                placeHolder: '例如：中国'
             });
             
-            if (fileUri && fileUri[0]) {
-                const newRules = await typoRuleManager.importRules(fileUri[0].fsPath);
-                const existingRules = dictionary.getRules();
-                const mergedRules = typoRuleManager.mergeRules(existingRules, newRules);
-                dictionary.setRules(mergedRules);
-                vscode.window.showInformationMessage('规则导入成功');
+            if (!original) {
+                return;
+            }
+            
+            const suggestion = await vscode.window.showInputBox({
+                prompt: '请输入正确的词',
+                placeHolder: '例如：中国'
+            });
+            
+            if (!suggestion) {
+                return;
+            }
+            
+            // 添加到配置
+            const config = new Configuration();
+            await config.addCustomRule({
+                original,
+                suggestion,
+                enabled: true
+            });
+            
+            // 重新加载规则
+            dictionary.loadFromConfig();
+            
+            vscode.window.showInformationMessage(`已添加自定义规则: ${original} -> ${suggestion}`);
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`添加自定义规则失败: ${error.message}`);
+        }
+    });
+
+    // 注册命令：导出错别字文件
+    const exportTypoDictionaryCommand = vscode.commands.registerCommand('chinese-typo-checker.exportTypoDictionary', async () => {
+        try {
+            // 获取所有规则
+            const rules = dictionary.getRules();
+            
+            // 创建导出内容
+            let content = '# 错别字映射表\n';
+            content += '# 格式：错别字：正确词\n\n';
+            
+            for (const rule of rules) {
+                if (rule.enabled) {
+                    content += `${rule.original}：${rule.suggestion}\n`;
+                }
+            }
+            
+            // 提示用户选择保存位置
+            const uri = await vscode.window.showSaveDialog({
+                filters: { '文本文件': ['txt'] },
+                saveLabel: '导出',
+                title: '导出错别字文件'
+            });
+            
+            if (uri) {
+                // 写入文件
+                fs.writeFileSync(uri.fsPath, content, 'utf-8');
+                vscode.window.showInformationMessage(`错别字文件导出成功: ${uri.fsPath}`);
             }
         } catch (error: any) {
-            vscode.window.showErrorMessage(`导入规则失败: ${error.message}`);
+            vscode.window.showErrorMessage(`导出错别字文件失败: ${error.message}`);
         }
+    });
+
+    // 注册命令：切换使用默认规则
+    const toggleDefaultRulesCommand = vscode.commands.registerCommand('chinese-typo-checker.toggleDefaultRules', async () => {
+        try {
+            // 获取当前设置
+            const useDefaultRules = Configuration.useDefaultRules();
+            
+            // 切换设置
+            await vscode.workspace.getConfiguration('chinese-typo-checker').update(
+                'useDefaultRules', 
+                !useDefaultRules,
+                vscode.ConfigurationTarget.Global
+            );
+            
+            // 提示用户
+            if (!useDefaultRules) {
+                vscode.window.showInformationMessage('已启用默认错别字规则');
+            } else {
+                vscode.window.showInformationMessage('已禁用默认错别字规则，仅使用自定义规则');
+            }
+            
+            // 重新加载规则
+            // 清空当前规则
+            dictionary.clearRules();
+            
+            // 重新加载默认规则（如果启用）
+            if (!useDefaultRules) {
+                const dictionaryPath = path.join(context.extensionPath, 'resources', 'typoDict.txt');
+                try {
+                    dictionary.loadFromFile(dictionaryPath);
+                } catch (error) {
+                    console.error('无法加载错别字文件:', error);
+                }
+            }
+            
+            // 加载自定义规则
+            dictionary.loadFromConfig();
+            
+            // 重新检查当前文档
+            const editor = vscode.window.activeTextEditor;
+            if (editor) {
+                const typos = typoChecker.checkDocument(editor.document);
+                typoListView.updateTypos(typos);
+            }
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`切换默认规则失败: ${error.message}`);
+        }
+    });
+
+    // 注册视图标题栏命令
+    const applySelectedCommand = vscode.commands.registerCommand('chinese-typo-checker.applySelected', () => {
+        typoListView.applySelected();
+    });
+
+    const selectAllCommand = vscode.commands.registerCommand('chinese-typo-checker.selectAll', () => {
+        typoListView.selectAll();
+    });
+
+    const deselectAllCommand = vscode.commands.registerCommand('chinese-typo-checker.deselectAll', () => {
+        typoListView.deselectAll();
     });
 
     // 注册 Webview 消息处理
@@ -171,8 +370,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 注册所有命令
     context.subscriptions.push(
-        exportRulesCommand,
-        importRulesCommand
+        openDictionaryCommand,
+        openCustomDictionaryCommand,
+        addCustomRuleCommand,
+        exportTypoDictionaryCommand,
+        toggleDefaultRulesCommand,
+        applySelectedCommand,
+        selectAllCommand,
+        deselectAllCommand
     );
 }
 

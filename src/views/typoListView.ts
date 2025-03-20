@@ -126,7 +126,7 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
     /**
      * 全选错别字
      */
-    private selectAll(): void {
+    public selectAll(): void {
         try {
             // 将所有节点标记为已选择
             for (const node of this.nodes) {
@@ -143,7 +143,7 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
     /**
      * 取消全选错别字
      */
-    private deselectAll(): void {
+    public deselectAll(): void {
         try {
             // 将所有节点标记为未选择
             for (const node of this.nodes) {
@@ -160,7 +160,7 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
     /**
      * 应用选中的错别字修改
      */
-    private async applySelected(): Promise<void> {
+    public async applySelected(): Promise<void> {
         try {
             // 获取所有已选择的节点
             const selectedNodes = this.nodes.filter(node => node.selected);

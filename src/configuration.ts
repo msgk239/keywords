@@ -22,6 +22,13 @@ export class Configuration {
     }
 
     /**
+     * 检查是否使用默认错别字规则
+     */
+    public static useDefaultRules(): boolean {
+        return Configuration.getConfig().get('useDefaultRules', true);
+    }
+
+    /**
      * 获取自定义错别字规则
      */
     public getCustomRules(): TypoRule[] {

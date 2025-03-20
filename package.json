@@ -24,6 +24,10 @@
         "title": "检查中文错别字"
       },
       {
+        "command": "chinese-typo-checker.showTypoList",
+        "title": "显示错别字列表"
+      },
+      {
         "command": "chinese-typo-checker.fixAllTypos",
         "title": "修正所有错别字"
       },
@@ -33,59 +37,35 @@
       },
       {
         "command": "chinese-typo-checker.exportTypoDictionary",
-        "title": "导出错别字规则"
-      },
-      {
-        "command": "chinese-typo-checker.importRules",
-        "title": "导入错别字规则"
-      },
-      {
-        "command": "chinese-typo-checker.exportRules",
-        "title": "导出错别字规则"
+        "title": "导出错别字文件"
       },
       {
         "command": "chinese-typo-checker.openDictionary",
-        "title": "打开错别字映射表"
+        "title": "打开默认错别字映射表"
       },
       {
-        "command": "chinese-typo-checker.showTypoList",
-        "title": "显示错别字列表"
-      },
-      {
-        "command": "chinese-typo-checker.showTypoDetail",
-        "title": "显示错别字详情"
-      },
-      {
-        "command": "chinese-typo-checker.applySelected",
-        "title": "应用选中的错别字修改"
-      },
-      {
-        "command": "chinese-typo-checker.selectAll",
-        "title": "全选错别字"
-      },
-      {
-        "command": "chinese-typo-checker.deselectAll",
-        "title": "取消全选错别字"
-      },
-      {
-        "command": "chinese-typo-checker.toggleSelection",
-        "title": "切换选择状态"
-      },
-      {
-        "command": "chinese-typo-checker.toggleAndShowDetail",
-        "title": "切换选择并显示详情"
+        "command": "chinese-typo-checker.openCustomDictionary",
+        "title": "打开自定义错别字映射表"
       },
       {
         "command": "chinese-typo-checker.addCustomRule",
         "title": "添加自定义错别字规则"
       },
       {
-        "command": "chinese-typo-checker.exportCustomRules",
-        "title": "导出自定义错别字规则"
+        "command": "chinese-typo-checker.toggleDefaultRules",
+        "title": "切换是否使用默认规则"
       },
       {
-        "command": "chinese-typo-checker.importCustomRules",
-        "title": "导入自定义错别字规则"
+        "command": "chinese-typo-checker.applySelected",
+        "title": "应用选中的修正"
+      },
+      {
+        "command": "chinese-typo-checker.selectAll",
+        "title": "全选"
+      },
+      {
+        "command": "chinese-typo-checker.deselectAll",
+        "title": "取消全选"
       }
     ],
     "menus": {
@@ -96,10 +76,6 @@
         },
         {
           "command": "chinese-typo-checker.fixAllTypos",
-          "group": "chinese-typo-checker"
-        },
-        {
-          "command": "chinese-typo-checker.showTypoList",
           "group": "chinese-typo-checker"
         }
       ],
@@ -128,6 +104,11 @@
           "type": "boolean",
           "default": true,
           "description": "是否启用错别字检查"
+        },
+        "chinese-typo-checker.useDefaultRules": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否使用默认错别字规则（若关闭则只使用自定义规则）"
         },
         "chinese-typo-checker.customRules": {
           "type": "array",

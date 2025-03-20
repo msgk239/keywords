@@ -10,6 +10,20 @@ VS Code的中文错别字检查插件，用于检查和自动修正中文文档�
 - 支持自定义错别字规则
 - 支持导入/导出错别字规则
 
+## 安装方法
+
+VS Code：
+1. 下载插件的.vsix文件
+2. 打开VS Code，点击左侧扩展图标，点击"..."，选择"从VSIX安装..."
+3. 选择下载好的.vsix文件
+
+cursor：
+1. 下载插件的.vsix文件
+2. 打开cursor的扩展页面
+3. 直接把下载好的.vsix文件拖拽到页面中
+
+（也可以直接右键点击.vsix文件，打开方式选择VS Code或cursor，再右键点击该文件，选择“安装扩展VSIX”）
+
 ## 命令列表
 
 ### 文档检查命令
@@ -130,13 +144,6 @@ VS Code的中文错别字检查插件，用于检查和自动修正中文文档�
 - `chinese-typo-checker.customRules`: 自定义错别字规则列表
 - `chinese-typo-checker.highlight.enabled`: 是否高亮显示错别字（默认开启）
 - `chinese-typo-checker.highlight.color`: 错别字高亮颜色（默认红色 #FF0000）
-
-## 安装方法
-
-1. 下载插件的.vsix文件
-2. 打开VS Code（或cursor），点击左侧扩展图标，点击"..."，选择"从VSIX安装..."
-3. 选择下载好的.vsix文件
-（或直接把.vsix文件拖入到VS Code（cursor）的扩展页面中）
 
 ## 常见问题解答
 

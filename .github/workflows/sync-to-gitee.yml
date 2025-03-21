@@ -21,6 +21,10 @@ jobs:
           git remote add gitee https://${{ secrets.GITEE_USERNAME }}:${{ secrets.GITEE_TOKEN }}@gitee.com/${{ secrets.GITEE_USERNAME }}/${{ secrets.GITEE_KEYWORDS }}.git
           git push gitee master
           git push gitee --tags
+        env:
+          GITEE_USERNAME: ${{ secrets.GITEE_USERNAME }}
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          GITEE_KEYWORDS: ${{ secrets.GITEE_KEYWORDS }}
   sync-release:
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
@@ -40,3 +44,7 @@ jobs:
             "prerelease": ${{ github.event.release.prerelease }},
             "target_commitish": "master"
           }'
+        env:
+          GITEE_USERNAME: ${{ secrets.GITEE_USERNAME }}
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          GITEE_KEYWORDS: ${{ secrets.GITEE_KEYWORDS }}

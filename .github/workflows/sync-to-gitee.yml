@@ -1,0 +1,42 @@
+name: Sync to Gitee
+on: 
+  push:
+    branches:
+      - master
+    tags:
+      - '*'
+  release:
+    types: [published]
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Push to Gitee
+        run: |
+          git remote add gitee https://${{ secrets.GITEE_USERNAME }}:${{ secrets.GITEE_TOKEN }}@gitee.com/${{ secrets.GITEE_USERNAME }}/${{ secrets.GITEE_KEYWORDS }}.git
+          git push gitee master
+          git push gitee --tags
+  sync-release:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Sync Release to Gitee
+        run: |
+          curl -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_USERNAME }}/${{ secrets.GITEE_KEYWORDS }}/releases" \
+          -H "Authorization: token ${{ secrets.GITEE_TOKEN }}" \
+          -d '{
+            "tag_name": "${{ github.event.release.tag_name }}",
+            "name": "${{ github.event.release.name }}",
+            "body": "${{ github.event.release.body }}",
+            "prerelease": ${{ github.event.release.prerelease }},
+            "target_commitish": "master"
+          }'

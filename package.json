@@ -5,7 +5,7 @@
   "version": "0.0.2",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/chinese-typo-checker"
+    "url": "https://github.com/msgk239/keywords"
   },
   "engines": {
     "vscode": "^1.60.0"

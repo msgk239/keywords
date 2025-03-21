@@ -41,6 +41,58 @@ export function activate(context: vscode.ExtensionContext) {
     // 加载自定义错别字规则
     dictionary.loadFromConfig();
     
+    // 设置文件监视器监听自定义错别字文件变化
+    const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.chinese-typo-checker');
+    const customDictPath = path.join(userFolder, 'customDict.txt');
+    
+    // 确保目录存在
+    if (!fs.existsSync(userFolder)) {
+        fs.mkdirSync(userFolder, { recursive: true });
+    }
+    
+    // 如果文件不存在，创建空文件
+    if (!fs.existsSync(customDictPath)) {
+        fs.writeFileSync(customDictPath, '# 自定义错别字映射表\n# 格式：错别字：正确词\n', 'utf-8');
+    }
+    
+    // 监听文件变化
+    let fileWatcher: fs.FSWatcher | null = null;
+    try {
+        fileWatcher = fs.watch(customDictPath, (eventType, filename) => {
+            if (eventType === 'change') {
+                try {
+                    // 延迟一小段时间再加载，确保文件写入已完成
+                    setTimeout(() => {
+                        // 当文件发生变化时，重新加载字典
+                        dictionary.loadFromConfig();
+                        
+                        // 如果当前有打开的编辑器，重新检查文档
+                        const editor = vscode.window.activeTextEditor;
+                        if (editor) {
+                            const typos = typoChecker.checkDocument(editor.document);
+                            typoListView.updateTypos(typos);
+                        }
+                        
+                        console.log('自定义错别字文件已更新');
+                    }, 300); // 延迟300ms，等待文件写入完成
+                } catch (error) {
+                    console.error('重新加载错别字字典时出错:', error);
+                }
+            }
+        });
+        
+        // 当扩展停用时关闭文件监视器
+        context.subscriptions.push({
+            dispose: () => {
+                if (fileWatcher) {
+                    fileWatcher.close();
+                }
+            }
+        });
+    } catch (error) {
+        console.error('设置文件监视器时出错:', error);
+    }
+    
     // 初始化错别字检查器
     typoChecker = new TypoChecker(dictionary);
     
@@ -124,6 +176,9 @@ export function activate(context: vscode.ExtensionContext) {
                     // 打开自定义错别字文件
                     const uri = vscode.Uri.file(customDictPath);
                     await vscode.window.showTextDocument(uri);
+                    
+                    // 提示用户导入已生效
+                    vscode.window.showInformationMessage('导入的错别字规则已立即生效');
                 }
             } catch (error: any) {
                 vscode.window.showErrorMessage(`导入错别字文件失败: ${error.message}`);
@@ -304,7 +359,10 @@ export function activate(context: vscode.ExtensionContext) {
             }
             
             const uri = vscode.Uri.file(customDictPath);
-            await vscode.window.showTextDocument(uri);
+            const document = await vscode.window.showTextDocument(uri);
+            
+            // 提示用户文件保存后会自动生效
+            vscode.window.showInformationMessage('自定义错别字映射表已打开，修改保存后会立即生效');
         } catch (error: any) {
             vscode.window.showErrorMessage(`打开自定义错别字映射表失败: ${error.message}`);
         }

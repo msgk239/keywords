@@ -61,14 +61,30 @@ export class TypoDictionary {
      * 从配置中加载自定义错别字规则
      */
     public loadFromConfig(): void {
+        // 先清空已有的规则
+        this.clearRules();
+        
+        // 重新加载默认规则（如果启用）
+        if (Configuration.useDefaultRules()) {
+            const dictionaryPath = path.join(
+                vscode.extensions.getExtension('chinese-typo-checker')?.extensionPath || '',
+                'resources',
+                'typoDict.txt'
+            );
+            if (fs.existsSync(dictionaryPath)) {
+                this.loadFromFile(dictionaryPath);
+            }
+        }
+        
+        // 加载配置中的自定义规则
         const config = vscode.workspace.getConfiguration('chinese-typo-checker');
         const customRules = config.get<TypoRule[]>('customRules', []);
         
-        // 合并自定义规则
+        // 合并自定义规则（将覆盖默认规则）
         this.rules = this.mergeRules(this.rules, customRules);
         this.updateTypoMap();
         
-        // 尝试读取自定义错别字文件
+        // 尝试读取自定义错别字文件（优先级最高）
         this.loadFromCustomFile();
     }
     
@@ -85,7 +101,7 @@ export class TypoDictionary {
                 const content = fs.readFileSync(customDictPath, 'utf-8');
                 const customRules = this.parseCustomFileContent(content);
                 
-                // 合并自定义规则（优先级高于默认规则）
+                // 合并自定义规则（优先级最高）
                 this.rules = this.mergeRules(this.rules, customRules);
                 this.updateTypoMap();
             }

@@ -7,7 +7,7 @@ on:
     tags:
       - '*'
   release:
-    types: [published, edited]
+    types: [published]
 
 jobs:
   sync:

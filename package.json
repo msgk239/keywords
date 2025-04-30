@@ -182,7 +182,10 @@
   },
   "dependencies": {
     "docx": "^8.5.0",
-    "mammoth": "^1.9.0"
+    "mammoth": "^1.9.0",
+    "docxtemplater": "^3.37.11",
+    "pizzip": "^3.1.4",
+    "jszip": "^3.10.1"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

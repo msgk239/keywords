@@ -22,7 +22,43 @@ cursor：
 2. 打开cursor的扩展页面
 3. 直接把下载好的.vsix文件拖拽到页面中
 
-（也可以直接右键点击.vsix文件，打开方式选择VS Code或cursor，再右键点击该文件，选择“安装扩展VSIX”）
+（也可以直接右键点击.vsix文件，打开方式选择VS Code或cursor，再右键点击该文件，选择"安装扩展VSIX"）
+
+## 开发者指南
+
+### 环境准备
+确保已安装Node.js和npm
+
+### 常用命令
+
+```bash
+# 安装依赖
+npm install
+
+# 编译插件
+npm run compile
+
+# 打包插件为.vsix文件
+npm run package
+
+# 持续编译（开发模式）
+npm run watch
+
+# 运行测试
+npm run test
+```
+
+### 插件构建流程
+1. 克隆仓库: `git clone https://github.com/msgk239/keywords.git`
+2. 进入目录: `cd keywords`
+3. 安装依赖: `npm install`
+4. 编译插件: `npm run compile`
+5. 打包插件: `npm run package` (生成.vsix文件)
+
+### 调试方法
+1. 在VS Code中打开项目文件夹
+2. 按F5启动调试会话
+3. 将会启动一个扩展开发主机窗口，可在该窗口中测试插件
 
 ## 命令列表
 

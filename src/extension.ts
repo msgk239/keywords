@@ -7,11 +7,13 @@ import { DocxHandler } from './modules/docx/docxHandler';
 import { TypoListView } from './views/typoListView';
 import { TypoRuleManager } from './modules/import-export/typoRuleManager';
 import * as fs from 'fs';
+import { DocxTemplateHandler } from './modules/docx/docxTemplateHandler';
 
 // 全局变量
 let typoChecker: TypoChecker;
 let typoListView: TypoListView;
 let docxHandler: DocxHandler;
+let docxTemplateHandler: DocxTemplateHandler;
 let typoRuleManager: TypoRuleManager;
 
 /**
@@ -27,6 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     // 初始化各个模块
     const dictionary = new TypoDictionary();
     docxHandler = new DocxHandler();
+    docxTemplateHandler = new DocxTemplateHandler();
     typoListView = new TypoListView(context);
     typoRuleManager = new TypoRuleManager();
     
@@ -289,8 +292,15 @@ export function activate(context: vscode.ExtensionContext) {
                     location: vscode.ProgressLocation.Notification,
                     title: "正在导出Word文档",
                 }, async (progress) => {
-                    // 导出为新的Word文档
-                    const newDocxPath = await docxHandler.exportToDocx(editor.document.getText(), originalDocxPath);
+                    progress.report({ message: "正在处理文档格式..." });
+                    
+                    // 使用新的模板处理器导出Word文档
+                    const newDocxPath = await docxTemplateHandler.exportWithParagraphMatching(
+                        editor.document.getText(), 
+                        originalDocxPath
+                    );
+                    
+                    progress.report({ message: "文档导出完成", increment: 100 });
                     vscode.window.showInformationMessage(`已导出到: ${newDocxPath}`);
                 });
             } catch (error: any) {

@@ -2,7 +2,7 @@
   "name": "chinese-typo-checker",
   "displayName": "中文错别字检查",
   "description": "检查和自动修正中文文档中的错别字",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/msgk239/keywords"
@@ -175,7 +175,8 @@
       "chinese-typo-checker-view": [
         {
           "id": "chineseTypos",
-          "name": "中文错别字列表"
+          "name": "中文错别字列表",
+          "icon": "resources/icon.svg"
         }
       ]
     },

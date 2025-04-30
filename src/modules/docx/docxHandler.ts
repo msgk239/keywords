@@ -95,18 +95,37 @@ export class DocxHandler {
             const paragraphs = content.split('\n\n').map(paragraph => {
                 // 处理段落内的换行
                 const lines = paragraph.split('\n').filter(line => line.trim());
-                return new Paragraph({
-                    children: lines.map(line => 
+                const textRuns: any[] = [];
+                
+                // 为每行创建一个TextRun，并在每行后添加一个换行标记
+                for (let i = 0; i < lines.length; i++) {
+                    // 添加当前行的文本
+                    textRuns.push(
                         new TextRun({
-                            text: line,
+                            text: lines[i],
                             size: 24, // 12pt
                             font: '宋体'
                         })
-                    ),
+                    );
+                    
+                    // 如果不是最后一行，添加一个换行标记
+                    if (i < lines.length - 1) {
+                        textRuns.push(
+                            new TextRun({
+                                break: 1,
+                                text: ""
+                            })
+                        );
+                    }
+                }
+                
+                return new Paragraph({
+                    children: textRuns,
                     spacing: {
                         after: 200, // 段落间距
                         line: 360 // 行间距
-                    }
+                    },
+                    alignment: 'left' // 明确设置左对齐
                 });
             });
 
@@ -127,7 +146,8 @@ export class DocxHandler {
                                 spacing: {
                                     after: 200,
                                     line: 360
-                                }
+                                },
+                                alignment: 'left' // 设置默认左对齐
                             }
                         }
                     }

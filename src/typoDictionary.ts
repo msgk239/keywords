@@ -15,6 +15,11 @@ export interface TypoMap {
 export class TypoDictionary {
     private typoMap: TypoMap = {};
     private rules: TypoRule[] = [];
+    private extensionPath: string;
+    
+    constructor(extensionPath: string) {
+        this.extensionPath = extensionPath;
+    }
     
     /**
      * 从文件加载错别字映射
@@ -23,13 +28,17 @@ export class TypoDictionary {
     public loadFromFile(filePath: string): void {
         // 如果设置为不使用默认规则，则不加载
         if (!Configuration.useDefaultRules()) {
+            console.log('默认规则已禁用，跳过加载默认规则');
             return;
         }
         
         try {
+            console.log(`正在加载错别字文件: ${filePath}`);
             const content = fs.readFileSync(filePath, 'utf-8');
             this.parseFileContent(content);
+            console.log(`已加载错别字规则，当前规则数量: ${this.rules.length}`);
         } catch (error) {
+            console.error(`无法加载错别字文件: ${error}`);
             vscode.window.showErrorMessage(`无法加载错别字文件: ${error}`);
         }
     }
@@ -40,6 +49,7 @@ export class TypoDictionary {
      */
     private parseFileContent(content: string): void {
         const lines = content.split('\n');
+        let parsedCount = 0;
         
         for (const line of lines) {
             const trimmedLine = line.trim();
@@ -52,40 +62,50 @@ export class TypoDictionary {
                         suggestion: correction,
                         enabled: true
                     });
+                    parsedCount++;
                 }
             }
         }
+        console.log(`从文件中解析出 ${parsedCount} 条规则`);
     }
     
     /**
      * 从配置中加载自定义错别字规则
      */
     public loadFromConfig(): void {
+        console.log('开始从配置加载错别字规则');
+        
         // 先清空已有的规则
         this.clearRules();
         
         // 重新加载默认规则（如果启用）
         if (Configuration.useDefaultRules()) {
-            const dictionaryPath = path.join(
-                vscode.extensions.getExtension('chinese-typo-checker')?.extensionPath || '',
-                'resources',
-                'typoDict.txt'
-            );
+            const dictionaryPath = path.join(this.extensionPath, 'resources', 'typoDict.txt');
+            console.log(`默认规则文件路径: ${dictionaryPath}`);
+            
             if (fs.existsSync(dictionaryPath)) {
+                console.log('默认规则文件存在，开始加载');
                 this.loadFromFile(dictionaryPath);
+            } else {
+                console.error(`默认规则文件不存在: ${dictionaryPath}`);
             }
         }
         
         // 加载配置中的自定义规则
         const config = vscode.workspace.getConfiguration('chinese-typo-checker');
         const customRules = config.get<TypoRule[]>('customRules', []);
+        console.log(`从配置中加载了 ${customRules.length} 条自定义规则`);
         
         // 合并自定义规则（将覆盖默认规则）
         this.rules = this.mergeRules(this.rules, customRules);
+        console.log(`合并规则后，当前规则数量: ${this.rules.length}`);
+        
         this.updateTypoMap();
+        console.log(`更新后的typoMap包含 ${Object.keys(this.typoMap).length} 个映射`);
         
         // 尝试读取自定义错别字文件（优先级最高）
         this.loadFromCustomFile();
+        console.log(`最终加载完成，当前规则数量: ${this.rules.length}，typoMap大小: ${Object.keys(this.typoMap).length}`);
     }
     
     /**
@@ -96,14 +116,22 @@ export class TypoDictionary {
             // 用户目录下的自定义错别字文件
             const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.chinese-typo-checker');
             const customDictPath = path.join(userFolder, 'customDict.txt');
+            console.log(`尝试加载自定义错别字文件: ${customDictPath}`);
             
             if (fs.existsSync(customDictPath)) {
+                console.log('自定义错别字文件存在，开始加载');
                 const content = fs.readFileSync(customDictPath, 'utf-8');
                 const customRules = this.parseCustomFileContent(content);
+                console.log(`从自定义文件中解析出 ${customRules.length} 条规则`);
                 
                 // 合并自定义规则（优先级最高）
                 this.rules = this.mergeRules(this.rules, customRules);
+                console.log(`合并自定义规则后，当前规则数量: ${this.rules.length}`);
+                
                 this.updateTypoMap();
+                console.log(`更新后的typoMap包含 ${Object.keys(this.typoMap).length} 个映射`);
+            } else {
+                console.log('自定义错别字文件不存在，跳过加载');
             }
         } catch (error) {
             console.error('无法加载自定义错别字文件:', error);
@@ -118,6 +146,7 @@ export class TypoDictionary {
     private parseCustomFileContent(content: string): TypoRule[] {
         const lines = content.split('\n');
         const rules: TypoRule[] = [];
+        let parsedCount = 0;
         
         for (const line of lines) {
             const trimmedLine = line.trim();
@@ -130,10 +159,12 @@ export class TypoDictionary {
                         suggestion: correction,
                         enabled: true
                     });
+                    parsedCount++;
                 }
             }
         }
         
+        console.log(`从自定义文件中解析出 ${parsedCount} 条规则`);
         return rules;
     }
 
@@ -145,6 +176,7 @@ export class TypoDictionary {
      */
     private mergeRules(existingRules: TypoRule[], newRules: TypoRule[]): TypoRule[] {
         const mergedRules = new Map<string, TypoRule>();
+        console.log(`开始合并规则，现有规则: ${existingRules.length}，新规则: ${newRules.length}`);
         
         // 添加现有规则
         existingRules.forEach(rule => {
@@ -164,7 +196,9 @@ export class TypoDictionary {
             }
         });
 
-        return Array.from(mergedRules.values());
+        const result = Array.from(mergedRules.values());
+        console.log(`合并后的规则数量: ${result.length}`);
+        return result;
     }
 
     /**
@@ -172,11 +206,16 @@ export class TypoDictionary {
      */
     private updateTypoMap(): void {
         this.typoMap = {};
+        let enabledCount = 0;
+        
         this.rules.forEach(rule => {
             if (rule.enabled) {
                 this.typoMap[rule.original] = rule.suggestion;
+                enabledCount++;
             }
         });
+        
+        console.log(`已更新typoMap，启用的规则数量: ${enabledCount}`);
     }
 
     /**
@@ -202,6 +241,7 @@ export class TypoDictionary {
     public clearRules(): void {
         this.rules = [];
         this.typoMap = {};
+        console.log('已清空所有规则和typoMap');
     }
     
     /**

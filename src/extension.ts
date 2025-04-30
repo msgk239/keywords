@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
     const config = new Configuration();
     
     // 初始化各个模块
-    const dictionary = new TypoDictionary();
+    const dictionary = new TypoDictionary(context.extensionPath);
     docxHandler = new DocxHandler();
     docxTemplateHandler = new DocxTemplateHandler();
     typoListView = new TypoListView(context);
@@ -36,13 +36,23 @@ export function activate(context: vscode.ExtensionContext) {
     // 尝试加载错别字文件
     const dictionaryPath = path.join(context.extensionPath, 'resources', 'typoDict.txt');
     try {
+        console.log(`插件路径: ${context.extensionPath}`);
+        console.log(`尝试加载错别字文件: ${dictionaryPath}`);
+        if (fs.existsSync(dictionaryPath)) {
+            console.log(`错别字文件存在，开始加载`);
         dictionary.loadFromFile(dictionaryPath);
+        } else {
+            console.error(`错别字文件不存在: ${dictionaryPath}`);
+        }
     } catch (error) {
         console.error('无法加载错别字文件:', error);
     }
     
     // 加载自定义错别字规则
     dictionary.loadFromConfig();
+    
+    // 输出加载的规则数量
+    console.log(`总共加载了 ${dictionary.getRules().length} 条规则，typoMap中有 ${Object.keys(dictionary.getAllTypos()).length} 个映射`);
     
     // 设置文件监视器监听自定义错别字文件变化
     const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.chinese-typo-checker');
@@ -109,6 +119,10 @@ export function activate(context: vscode.ExtensionContext) {
                 return;
             }
             
+            console.log('开始检查文档错别字...');
+            console.log(`当前加载的规则数量: ${dictionary.getRules().length}`);
+            console.log(`typoMap中包含的映射数量: ${Object.keys(dictionary.getAllTypos()).length}`);
+            
             const typos = typoChecker.checkDocument(editor.document);
             typoListView.updateTypos(typos);
             
@@ -116,8 +130,12 @@ export function activate(context: vscode.ExtensionContext) {
             await vscode.commands.executeCommand('workbench.view.extension.chinese-typo-checker-view');
             
             if (typos.length > 0) {
+                console.log(`找到 ${typos.length} 个错别字`);
                 vscode.window.showInformationMessage(`发现 ${typos.length} 个错别字`);
             } else {
+                console.log('未找到错别字');
+                console.log('检查typoMap是否为空: ', Object.keys(dictionary.getAllTypos()).length === 0 ? '是' : '否');
+                console.log('检查规则是否为空: ', dictionary.getRules().length === 0 ? '是' : '否');
                 vscode.window.showInformationMessage('未发现错别字');
             }
         }),

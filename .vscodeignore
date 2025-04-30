@@ -1,7 +1,19 @@
 .vscode/**
 .vscode-test/**
+.trae/**
 src/**
 .gitignore
+.github/**
 tsconfig.json
 **/*.map
-**/*.ts 
+**/*.ts
+.git
+chinese-typo-checker-*.vsix
+
+# 排除项目中的测试和不必要文件
+test/**
+setup.ps1
+原始词库_去重.txt
+测试
+目标词.txt
+VS Code 中文错别字检查插件需求文档.md 

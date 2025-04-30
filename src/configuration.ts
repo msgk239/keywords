@@ -18,27 +18,34 @@ export class Configuration {
      * 检查是否启用了错别字检查
      */
     public static isEnabled(): boolean {
-        return Configuration.getConfig().get('enabled', true);
+        const enabled = Configuration.getConfig().get('enabled', true);
+        console.log(`配置 enabled: ${enabled}`);
+        return enabled;
     }
 
     /**
      * 检查是否使用默认错别字规则
      */
     public static useDefaultRules(): boolean {
-        return Configuration.getConfig().get('useDefaultRules', true);
+        const useDefault = Configuration.getConfig().get('useDefaultRules', true);
+        console.log(`配置 useDefaultRules: ${useDefault}`);
+        return useDefault;
     }
 
     /**
      * 获取自定义错别字规则
      */
     public getCustomRules(): TypoRule[] {
-        return Configuration.getConfig().get('customRules', []);
+        const rules = Configuration.getConfig().get<TypoRule[]>('customRules', []);
+        console.log(`获取到 ${rules.length} 条自定义规则`);
+        return rules;
     }
 
     /**
      * 设置自定义错别字规则
      */
     public async setCustomRules(rules: TypoRule[]): Promise<void> {
+        console.log(`设置 ${rules.length} 条自定义规则`);
         await Configuration.getConfig().update('customRules', rules, true);
     }
 

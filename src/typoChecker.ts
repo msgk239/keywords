@@ -13,6 +13,15 @@ export interface TypoItem {
 }
 
 /**
+ * 转义正则表达式特殊字符
+ * @param string 要转义的字符串
+ * @returns 转义后的字符串
+ */
+function escapeRegExp(string: string): string {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * 错别字检查类，负责在文档中查找和修正错别字
  */
 export class TypoChecker {
@@ -37,10 +46,14 @@ export class TypoChecker {
         const typos: TypoItem[] = [];
         const typoMap = this.dictionary.getAllTypos();
         
+        console.log(`开始检查文档错别字，文档长度: ${text.length}，typoMap大小: ${Object.keys(typoMap).length}`);
+        
         // 为每个错别字检查文档
         for (const typo in typoMap) {
-            // 使用正则表达式匹配错别字
-            const regex = new RegExp(typo, 'g');
+            try {
+                // 转义特殊字符并使用正则表达式匹配错别字
+                const escapedTypo = escapeRegExp(typo);
+                const regex = new RegExp(escapedTypo, 'g');
             let match;
             
             while ((match = regex.exec(text)) !== null) {
@@ -58,8 +71,13 @@ export class TypoChecker {
                     column: position.character,
                     range: range
                 });
+                }
+            } catch (error) {
+                console.error(`正则表达式匹配错误: ${typo}, ${error}`);
             }
         }
+        
+        console.log(`文档检查完成，找到 ${typos.length} 个错别字`);
         
         // 更新诊断信息
         this.updateDiagnostics(document, typos);
@@ -119,7 +137,8 @@ export class TypoChecker {
      */
     public async fixTypo(document: vscode.TextDocument, editor: vscode.TextEditor, original: string, suggestion: string): Promise<void> {
         const text = document.getText();
-        const regex = new RegExp(original, 'g');
+        const escapedOriginal = escapeRegExp(original);
+        const regex = new RegExp(escapedOriginal, 'g');
         let match;
         
         while ((match = regex.exec(text)) !== null) {
@@ -157,8 +176,10 @@ export class TypoChecker {
         
         // 为每个错别字检查文本
         for (const typo in typoMap) {
-            // 使用正则表达式匹配错别字
-            const regex = new RegExp(typo, 'g');
+            try {
+                // 转义特殊字符并使用正则表达式匹配错别字
+                const escapedTypo = escapeRegExp(typo);
+                const regex = new RegExp(escapedTypo, 'g');
             let match;
             
             // 查找所有匹配项
@@ -167,6 +188,9 @@ export class TypoChecker {
                     original: typo,
                     suggestion: typoMap[typo]
                 });
+                }
+            } catch (error) {
+                console.error(`正则表达式匹配错误: ${typo}, ${error}`);
             }
         }
         

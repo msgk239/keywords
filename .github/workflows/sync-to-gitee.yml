@@ -1,5 +1,6 @@
 name: Sync to Gitee
-on: 
+
+on:
   push:
     branches:
       - master
@@ -7,36 +8,83 @@ on:
       - '*'
   release:
     types: [published]
+
 jobs:
   sync:
     runs-on: ubuntu-latest
+    # 这个 job 在 push 事件时运行 (master 推送 或 tag 推送)
     if: github.event_name == 'push'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # 获取所有历史记录
+
       - name: Push to Gitee
+        env: # 使用环境变量更安全
+          GITEE_USERNAME: ${{ secrets.GITEE_USERNAME }}
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          GITEE_REPO: ${{ secrets.GITEE_REPO }}
         run: |
-          git remote add gitee https://${{ secrets.GITEE_USERNAME }}:${{ secrets.GITEE_TOKEN }}@gitee.com/${{ secrets.GITEE_USERNAME }}/${{ secrets.GITEE_REPO }}.git
-          git push gitee master
+          echo "Setting up Gitee remote..."
+          # 添加 Gitee 远程仓库
+          git remote add gitee "https://${GITEE_USERNAME}:${GITEE_TOKEN}@gitee.com/${GITEE_USERNAME}/${GITEE_REPO}.git"
+
+          echo "Attempting to push master branch..."
+          # 尝试推送 master 分支。如果本地没有 master (例如 tag 触发时)，会失败，但我们继续执行
+          # 使用 || true 确保即使推送失败，脚本也不会在此处停止
+          git push gitee master:master || echo "Pushing master failed (might be a tag push trigger, continuing...)"
+
+          echo "Pushing tags..."
+          # 强制执行推送所有标签的操作
+          # 这是确保标签同步的关键步骤
           git push gitee --tags
+          # 如果希望覆盖 Gitee 上可能存在的同名标签，可以添加 --force
+          # git push gitee --tags --force
+
   sync-release:
     runs-on: ubuntu-latest
+    # 这个 job 只在 release 事件时运行 - 保持不变
     if: github.event_name == 'release'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - name: Sync Release to Gitee
+        # 保持原样，不使用 jq，因为用户要求最小修改
+        # 注意：如果 Release Body 包含特殊字符，这里仍有失败风险
         run: |
-          curl -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_USERNAME }}/${{ secrets.GITEE_REPO }}/releases" \
-          -H "Authorization: token ${{ secrets.GITEE_TOKEN }}" \
-          -d '{
+          # 准备 curl 命令的 body 数据部分，尝试基础的转义 (但可能不完美)
+          BODY_ESCAPED=$(echo "${{ github.event.release.body }}" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\n/\\n/g')
+          NAME_ESCAPED=$(echo "${{ github.event.release.name }}" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
+
+          # 构建 JSON 字符串
+          JSON_PAYLOAD=$(cat <<EOF
+          {
             "tag_name": "${{ github.event.release.tag_name }}",
-            "name": "${{ github.event.release.name }}",
-            "body": "${{ github.event.release.body }}",
+            "name": "$NAME_ESCAPED",
+            "body": "$BODY_ESCAPED",
             "prerelease": ${{ github.event.release.prerelease }},
             "target_commitish": "master"
-          }'
+          }
+          EOF
+          )
+
+          echo "Sending payload to Gitee API:"
+          # echo "$JSON_PAYLOAD" # 取消注释以调试 payload
+
+          curl -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_USERNAME }}/${{ secrets.GITEE_REPO }}/releases" \
+          -H "Authorization: token ${{ secrets.GITEE_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d "$JSON_PAYLOAD"
+
+          # 检查 curl 的退出码 (可选，但推荐)
+          if [ $? -ne 0 ]; then
+            echo "::error ::Failed to create Gitee release via API. Check body content for special characters or API response."
+            # 即使 Release API 调用失败，也不一定需要让整个 job 失败
+            # exit 1
+          else
+            echo "Gitee Release creation request sent."
+          fi

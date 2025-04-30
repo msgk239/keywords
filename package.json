@@ -159,6 +159,15 @@
           "type": "string",
           "default": "#FF0000",
           "description": "错别字高亮颜色"
+        },
+        "chinese-typo-checker.supportedFileTypes": {
+          "type": "array",
+          "default": ["markdown", "plaintext"],
+          "description": "支持的文件类型（只在这些类型的文件中检查错别字）",
+          "items": {
+            "type": "string",
+            "enum": ["markdown", "plaintext"]
+          }
         }
       }
     },

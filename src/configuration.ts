@@ -62,4 +62,22 @@ export class Configuration {
     public getHighlightColor(): string {
         return Configuration.getConfig().get('highlight.color', '#ffd700');
     }
-} 
+
+    /**
+     * 获取支持的文件类型
+     * @returns 支持的文件类型数组
+     */
+    public static getSupportedFileTypes(): string[] {
+        return Configuration.getConfig().get('supportedFileTypes', ['markdown', 'plaintext']);
+    }
+
+    /**
+     * 检查文件类型是否受支持
+     * @param document 要检查的文档
+     * @returns 是否支持该文件类型
+     */
+    public static isSupportedFileType(document: vscode.TextDocument): boolean {
+        const supportedTypes = Configuration.getSupportedFileTypes();
+        return supportedTypes.includes(document.languageId);
+    }
+}

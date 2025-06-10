@@ -8,7 +8,7 @@ tsconfig.json
 **/*.map
 **/*.ts
 .git
-chinese-typo-checker-*.vsix
+nonsense-to-flow-*.vsix
 
 # 排除项目中的测试和不必要文件
 test/**

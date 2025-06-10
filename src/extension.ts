@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
     console.log(`总共加载了 ${dictionary.getRules().length} 条规则，typoMap中有 ${Object.keys(dictionary.getAllTypos()).length} 个映射`);
 
     // 设置文件监视器监听自定义错别字文件变化
-    const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.chinese-typo-checker');
+    const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.nonsense-to-flow');
     const customDictPath = path.join(userFolder, 'customDict.txt');
 
     // 确保目录存在
@@ -112,7 +112,7 @@ export function activate(context: vscode.ExtensionContext) {
     // 注册命令
     context.subscriptions.push(
         // 检查文档
-        vscode.commands.registerCommand('chinese-typo-checker.checkDocument', async (args?: any) => {
+        vscode.commands.registerCommand('nonsense-to-flow.checkDocument', async (args?: any) => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
                 vscode.window.showErrorMessage('没有打开的编辑器');
@@ -133,7 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
             typoListView.updateTypos(typos);
 
             // 无论从哪里触发都显示列表
-            await vscode.commands.executeCommand('workbench.view.extension.chinese-typo-checker-view');
+            await vscode.commands.executeCommand('workbench.view.extension.nonsense-to-flow-view');
 
             if (typos.length > 0) {
                 console.log(`找到 ${typos.length} 个错别字`);
@@ -147,7 +147,7 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         // 修正所有错别字
-        vscode.commands.registerCommand('chinese-typo-checker.fixAllTypos', async () => {
+        vscode.commands.registerCommand('nonsense-to-flow.fixAllTypos', async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
                 vscode.window.showErrorMessage('没有打开的编辑器');
@@ -177,7 +177,7 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         // 导入错别字文件
-        vscode.commands.registerCommand('chinese-typo-checker.importTypoDictionary', async () => {
+        vscode.commands.registerCommand('nonsense-to-flow.importTypoDictionary', async () => {
             try {
                 const fileUri = await vscode.window.showOpenDialog({
                     filters: { 'Text Files': ['txt'] },
@@ -187,7 +187,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (fileUri && fileUri[0]) {
                     const filePath = fileUri[0].fsPath;
                     // 用户目录下的自定义错别字文件
-                    const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.chinese-typo-checker');
+                    const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.nonsense-to-flow');
                     const customDictPath = path.join(userFolder, 'customDict.txt');
 
                     // 确保目录存在
@@ -219,12 +219,12 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         // 显示错别字列表
-        vscode.commands.registerCommand('chinese-typo-checker.showTypoList', () => {
-            vscode.commands.executeCommand('workbench.view.extension.chinese-typo-checker-view');
+        vscode.commands.registerCommand('nonsense-to-flow.showTypoList', () => {
+            vscode.commands.executeCommand('workbench.view.extension.nonsense-to-flow-view');
         }),
 
         // 显示错别字详情
-        vscode.commands.registerCommand('chinese-typo-checker.showTypoDetail', (typo: any) => {
+        vscode.commands.registerCommand('nonsense-to-flow.showTypoDetail', (typo: any) => {
             // 调用 typoListView 的方法处理选择
             typoListView.showTypoDetail(typo);
 
@@ -237,7 +237,7 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         // 检查Word文档错别字
-        vscode.commands.registerCommand('chinese-typo-checker.checkDocx', async () => {
+        vscode.commands.registerCommand('nonsense-to-flow.checkDocx', async () => {
             try {
                 // 让用户选择.docx文件
                 const files = await vscode.window.showOpenDialog({
@@ -284,7 +284,7 @@ export function activate(context: vscode.ExtensionContext) {
                     typoListView.updateTypos(documentTypos);
 
                     // 显示错别字列表
-                    await vscode.commands.executeCommand('workbench.view.extension.chinese-typo-checker-view');
+                    await vscode.commands.executeCommand('workbench.view.extension.nonsense-to-flow-view');
 
                     if (typos.length > 0) {
                         vscode.window.showInformationMessage(`发现 ${typos.length} 个错别字，请在临时文件中修改`);
@@ -299,7 +299,7 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         // 导出为Word文档
-        vscode.commands.registerCommand('chinese-typo-checker.exportToDocx', async () => {
+        vscode.commands.registerCommand('nonsense-to-flow.exportToDocx', async () => {
             try {
                 const editor = vscode.window.activeTextEditor;
                 if (!editor) {
@@ -338,7 +338,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     // 注册命令：打开默认错别字映射表
-    const openDictionaryCommand = vscode.commands.registerCommand('chinese-typo-checker.openDictionary', async () => {
+    const openDictionaryCommand = vscode.commands.registerCommand('nonsense-to-flow.openDictionary', async () => {
         try {
             const dictionaryPath = path.join(context.extensionPath, 'resources', 'typoDict.txt');
             const uri = vscode.Uri.file(dictionaryPath);
@@ -370,10 +370,10 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 注册命令：打开自定义错别字映射表
-    const openCustomDictionaryCommand = vscode.commands.registerCommand('chinese-typo-checker.openCustomDictionary', async () => {
+    const openCustomDictionaryCommand = vscode.commands.registerCommand('nonsense-to-flow.openCustomDictionary', async () => {
         try {
             // 用户目录下的自定义错别字文件
-            const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.chinese-typo-checker');
+            const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.nonsense-to-flow');
             const customDictPath = path.join(userFolder, 'customDict.txt');
 
             // 确保目录存在
@@ -397,7 +397,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 注册命令：导出错别字文件
-    const exportTypoDictionaryCommand = vscode.commands.registerCommand('chinese-typo-checker.exportTypoDictionary', async () => {
+    const exportTypoDictionaryCommand = vscode.commands.registerCommand('nonsense-to-flow.exportTypoDictionary', async () => {
         try {
             // 获取所有规则
             const rules = dictionary.getRules();
@@ -430,13 +430,13 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 注册命令：切换使用默认规则
-    const toggleDefaultRulesCommand = vscode.commands.registerCommand('chinese-typo-checker.toggleDefaultRules', async () => {
+    const toggleDefaultRulesCommand = vscode.commands.registerCommand('nonsense-to-flow.toggleDefaultRules', async () => {
         try {
             // 获取当前设置
             const useDefaultRules = Configuration.useDefaultRules();
 
             // 切换设置
-            await vscode.workspace.getConfiguration('chinese-typo-checker').update(
+            await vscode.workspace.getConfiguration('nonsense-to-flow').update(
                 'useDefaultRules',
                 !useDefaultRules,
                 vscode.ConfigurationTarget.Global
@@ -479,7 +479,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 注册 Webview 消息处理
     context.subscriptions.push(
-        vscode.commands.registerCommand('chinese-typo-checker.replaceText', async (original: string, suggestion: string) => {
+        vscode.commands.registerCommand('nonsense-to-flow.replaceText', async (original: string, suggestion: string) => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
                 return;

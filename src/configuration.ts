@@ -5,7 +5,7 @@ import { TypoRule } from './modules/import-export/typoRuleManager';
  * 配置管理类，负责管理插件配置
  */
 export class Configuration {
-    private static readonly CONFIG_SECTION = 'chinese-typo-checker';
+    private static readonly CONFIG_SECTION = 'nonsense-to-flow';
 
     /**
      * 获取工作区配置

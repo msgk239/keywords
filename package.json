@@ -1,7 +1,8 @@
 {
-  "name": "chinese-typo-checker",
-  "displayName": "中文错别字检查",
-  "description": "检查和自动修正中文文档中的错别字",
+  "name": "nonsense-to-flow",
+  "displayName": "潜催案例错别字修正工具",
+  "publisher": "msgk",
+  "description": "From deadpan nonsense, to a state of flow. A simple tool to polish your transcribed thoughts, correcting typos and refining clarity.",
   "version": "0.0.4",
   "repository": {
     "type": "git",

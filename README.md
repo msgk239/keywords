@@ -66,58 +66,58 @@ npm run test
 
 ### 文档检查命令
 
-- `检查中文错别字` (chinese-typo-checker.checkDocument)
+- `检查中文错别字` (nonsense-to-flow.checkDocument)
   - 功能：检查当前打开文档中的中文错别字
   - 触发方式：右键菜单或命令面板
   - 效果：在左侧错别字列表视图中显示所有发现的错别字
 
-- `修正所有错别字` (chinese-typo-checker.fixAllTypos)
+- `修正所有错别字` (nonsense-to-flow.fixAllTypos)
   - 功能：一键修正当前文档中的所有错别字
   - 触发方式：右键菜单或命令面板
   - 效果：自动替换所有已知的错别字为正确用词
 
-- `显示错别字列表` (chinese-typo-checker.showTypoList)
+- `显示错别字列表` (nonsense-to-flow.showTypoList)
   - 功能：显示错别字列表视图
   - 触发方式：命令面板
   - 效果：在左侧显示错别字列表面板
 
 ### 错别字列表视图命令
 
-- `应用选中的修正` (chinese-typo-checker.applySelected)
+- `应用选中的修正` (nonsense-to-flow.applySelected)
   - 功能：仅修正选中的错别字
   - 位置：错别字列表视图工具栏
 
-- `全选` (chinese-typo-checker.selectAll)
+- `全选` (nonsense-to-flow.selectAll)
   - 功能：选中所有错别字
   - 位置：错别字列表视图工具栏
 
-- `取消全选` (chinese-typo-checker.deselectAll)
+- `取消全选` (nonsense-to-flow.deselectAll)
   - 功能：取消所有错别字的选中状态
   - 位置：错别字列表视图工具栏
 
 ### 错别字规则管理命令
 
-- `打开默认错别字映射表` (chinese-typo-checker.openDictionary)
+- `打开默认错别字映射表` (nonsense-to-flow.openDictionary)
   - 功能：查看内置的错别字规则
   - 触发方式：命令面板
   - 说明：此文件为只读，修改需使用自定义映射表
 
-- `打开自定义错别字映射表` (chinese-typo-checker.openCustomDictionary)
+- `打开自定义错别字映射表` (nonsense-to-flow.openCustomDictionary)
   - 功能：编辑自定义错别字规则
   - 触发方式：命令面板
   - 说明：添加的规则会优先于默认规则
 
-- `导入错别字文件` (chinese-typo-checker.importTypoDictionary)
+- `导入错别字文件` (nonsense-to-flow.importTypoDictionary)
   - 功能：从外部txt文件导入错别字规则
   - 触发方式：命令面板
   - 格式要求：每行一条规则，格式为"错误词：正确词"
 
-- `导出错别字文件` (chinese-typo-checker.exportTypoDictionary)
+- `导出错别字文件` (nonsense-to-flow.exportTypoDictionary)
   - 功能：将当前所有规则导出为txt文件
   - 触发方式：命令面板
   - 说明：包含启用状态的所有规则
 
-- `切换是否使用错别字默认规则` (chinese-typo-checker.toggleDefaultRules)
+- `切换是否使用错别字默认规则` (nonsense-to-flow.toggleDefaultRules)
   - 功能：快速开启或关闭内置规则
   - 触发方式：命令面板
   - 说明：关闭后仅使用自定义规则
@@ -180,12 +180,12 @@ npm run test
 ## 自定义配置
 
 可在VS Code扩展设置中调整以下选项：
-- `chinese-typo-checker.enabled`: 是否启用错别字检查（默认开启）
-- `chinese-typo-checker.useDefaultRules`: 是否使用默认错别字规则（默认开启）
-- `chinese-typo-checker.customRules`: 自定义错别字规则列表
-- `chinese-typo-checker.highlight.enabled`: 是否高亮显示错别字（默认开启）
-- `chinese-typo-checker.highlight.color`: 错别字高亮颜色（默认红色 #FF0000）
-- `chinese-typo-checker.supportedFileTypes`: 支持的文件类型（默认为 Markdown 和纯文本文件）
+- `nonsense-to-flow.enabled`: 是否启用错别字检查（默认开启）
+- `nonsense-to-flow.useDefaultRules`: 是否使用默认错别字规则（默认开启）
+- `nonsense-to-flow.customRules`: 自定义错别字规则列表
+- `nonsense-to-flow.highlight.enabled`: 是否高亮显示错别字（默认开启）
+- `nonsense-to-flow.highlight.color`: 错别字高亮颜色（默认红色 #FF0000）
+- `nonsense-to-flow.supportedFileTypes`: 支持的文件类型（默认为 Markdown 和纯文本文件）
 
 ## 常见问题解答
 

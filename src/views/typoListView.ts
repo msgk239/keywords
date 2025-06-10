@@ -39,12 +39,12 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
 
         // 注册命令
         context.subscriptions.push(
-            vscode.commands.registerCommand('chinese-typo-checker.applySelected', () => this.applySelected()),
-            vscode.commands.registerCommand('chinese-typo-checker.selectAll', () => this.selectAll()),
-            vscode.commands.registerCommand('chinese-typo-checker.deselectAll', () => this.deselectAll()),
-            vscode.commands.registerCommand('chinese-typo-checker.toggleSelection', (node: TypoItemNode) => this.toggleSelection(node)),
-            vscode.commands.registerCommand('chinese-typo-checker.toggleAndShowDetail', (node: TypoItemNode) => this.toggleAndShowDetail(node)),
-            vscode.commands.registerCommand('chinese-typo-checker.deselectItem', (node: TypoItemNode) => this.deselectItem(node))
+            vscode.commands.registerCommand('nonsense-to-flow.applySelected', () => this.applySelected()),
+            vscode.commands.registerCommand('nonsense-to-flow.selectAll', () => this.selectAll()),
+            vscode.commands.registerCommand('nonsense-to-flow.deselectAll', () => this.deselectAll()),
+            vscode.commands.registerCommand('nonsense-to-flow.toggleSelection', (node: TypoItemNode) => this.toggleSelection(node)),
+            vscode.commands.registerCommand('nonsense-to-flow.toggleAndShowDetail', (node: TypoItemNode) => this.toggleAndShowDetail(node)),
+            vscode.commands.registerCommand('nonsense-to-flow.deselectItem', (node: TypoItemNode) => this.deselectItem(node))
         );
     }
 
@@ -69,7 +69,7 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
 
         // 设置命令
         treeItem.command = {
-            command: 'chinese-typo-checker.toggleSelection',
+            command: 'nonsense-to-flow.toggleSelection',
             title: '切换选择状态',
             arguments: [element]
         };
@@ -189,7 +189,7 @@ export class TypoListView implements vscode.TreeDataProvider<TypoItemNode> {
             // 使用短暂延迟再触发文档重新检查
             // 这可以确保编辑操作完全完成再进行检查
             setTimeout(() => {
-                vscode.commands.executeCommand('chinese-typo-checker.checkDocument');
+                vscode.commands.executeCommand('nonsense-to-flow.checkDocument');
             }, 100);
         } catch (error) {
             console.error('应用选中的错别字修改时出错:', error);

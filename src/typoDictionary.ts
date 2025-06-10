@@ -92,7 +92,7 @@ export class TypoDictionary {
         }
         
         // 加载配置中的自定义规则
-        const config = vscode.workspace.getConfiguration('chinese-typo-checker');
+        const config = vscode.workspace.getConfiguration('nonsense-to-flow');
         const customRules = config.get<TypoRule[]>('customRules', []);
         console.log(`从配置中加载了 ${customRules.length} 条自定义规则`);
         
@@ -114,7 +114,7 @@ export class TypoDictionary {
     private loadFromCustomFile(): void {
         try {
             // 用户目录下的自定义错别字文件
-            const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.chinese-typo-checker');
+            const userFolder = path.join(process.env.USERPROFILE || process.env.HOME || '', '.nonsense-to-flow');
             const customDictPath = path.join(userFolder, 'customDict.txt');
             console.log(`尝试加载自定义错别字文件: ${customDictPath}`);
             

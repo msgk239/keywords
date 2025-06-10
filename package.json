@@ -21,91 +21,91 @@
   "contributes": {
     "commands": [
       {
-        "command": "chinese-typo-checker.checkDocument",
+        "command": "nonsense-to-flow.checkDocument",
         "title": "检查中文错别字"
       },
       {
-        "command": "chinese-typo-checker.showTypoList",
+        "command": "nonsense-to-flow.showTypoList",
         "title": "显示错别字列表"
       },
       {
-        "command": "chinese-typo-checker.fixAllTypos",
+        "command": "nonsense-to-flow.fixAllTypos",
         "title": "修正所有错别字"
       },
       {
-        "command": "chinese-typo-checker.checkDocx",
+        "command": "nonsense-to-flow.checkDocx",
         "title": "导入Word文档检查错别字"
       },
       {
-        "command": "chinese-typo-checker.exportToDocx",
+        "command": "nonsense-to-flow.exportToDocx",
         "title": "导出为Word文档"
       },
       {
-        "command": "chinese-typo-checker.importTypoDictionary",
+        "command": "nonsense-to-flow.importTypoDictionary",
         "title": "导入错别字文件"
       },
       {
-        "command": "chinese-typo-checker.exportTypoDictionary",
+        "command": "nonsense-to-flow.exportTypoDictionary",
         "title": "导出错别字文件"
       },
       {
-        "command": "chinese-typo-checker.openDictionary",
+        "command": "nonsense-to-flow.openDictionary",
         "title": "打开默认错别字映射表"
       },
       {
-        "command": "chinese-typo-checker.openCustomDictionary",
+        "command": "nonsense-to-flow.openCustomDictionary",
         "title": "打开自定义错别字映射表"
       },
       {
-        "command": "chinese-typo-checker.toggleDefaultRules",
+        "command": "nonsense-to-flow.toggleDefaultRules",
         "title": "切换是否使用错别字默认规则"
       },
       {
-        "command": "chinese-typo-checker.applySelected",
+        "command": "nonsense-to-flow.applySelected",
         "title": "应用选中的修正"
       },
       {
-        "command": "chinese-typo-checker.selectAll",
+        "command": "nonsense-to-flow.selectAll",
         "title": "全选"
       },
       {
-        "command": "chinese-typo-checker.deselectAll",
+        "command": "nonsense-to-flow.deselectAll",
         "title": "取消全选"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "command": "chinese-typo-checker.checkDocument",
-          "group": "chinese-typo-checker"
+          "command": "nonsense-to-flow.checkDocument",
+          "group": "nonsense-to-flow"
         },
         {
-          "command": "chinese-typo-checker.fixAllTypos",
-          "group": "chinese-typo-checker"
+          "command": "nonsense-to-flow.fixAllTypos",
+          "group": "nonsense-to-flow"
         },
         {
-          "command": "chinese-typo-checker.checkDocx",
-          "group": "chinese-typo-checker"
+          "command": "nonsense-to-flow.checkDocx",
+          "group": "nonsense-to-flow"
         },
         {
-          "command": "chinese-typo-checker.exportToDocx",
-          "group": "chinese-typo-checker",
+          "command": "nonsense-to-flow.exportToDocx",
+          "group": "nonsense-to-flow",
           "when": "resourceExtname == .txt"
         }
       ],
       "view/title": [
         {
-          "command": "chinese-typo-checker.applySelected",
+          "command": "nonsense-to-flow.applySelected",
           "when": "view == chineseTypos",
           "group": "navigation"
         },
         {
-          "command": "chinese-typo-checker.selectAll",
+          "command": "nonsense-to-flow.selectAll",
           "when": "view == chineseTypos",
           "group": "navigation"
         },
         {
-          "command": "chinese-typo-checker.deselectAll",
+          "command": "nonsense-to-flow.deselectAll",
           "when": "view == chineseTypos",
           "group": "navigation"
         }
@@ -114,17 +114,17 @@
     "configuration": {
       "title": "中文错别字检查",
       "properties": {
-        "chinese-typo-checker.enabled": {
+        "nonsense-to-flow.enabled": {
           "type": "boolean",
           "default": true,
           "description": "是否启用错别字检查"
         },
-        "chinese-typo-checker.useDefaultRules": {
+        "nonsense-to-flow.useDefaultRules": {
           "type": "boolean",
           "default": true,
           "description": "是否使用默认错别字规则（若关闭则只使用自定义规则）"
         },
-        "chinese-typo-checker.customRules": {
+        "nonsense-to-flow.customRules": {
           "type": "array",
           "default": [],
           "description": "自定义错别字规则",
@@ -151,17 +151,17 @@
             ]
           }
         },
-        "chinese-typo-checker.highlight.enabled": {
+        "nonsense-to-flow.highlight.enabled": {
           "type": "boolean",
           "default": true,
           "description": "是否高亮显示错别字"
         },
-        "chinese-typo-checker.highlight.color": {
+        "nonsense-to-flow.highlight.color": {
           "type": "string",
           "default": "#FF0000",
           "description": "错别字高亮颜色"
         },
-        "chinese-typo-checker.supportedFileTypes": {
+        "nonsense-to-flow.supportedFileTypes": {
           "type": "array",
           "default": ["markdown", "plaintext"],
           "description": "支持的文件类型（只在这些类型的文件中检查错别字）",
@@ -173,7 +173,7 @@
       }
     },
     "views": {
-      "chinese-typo-checker-view": [
+      "nonsense-to-flow-view": [
         {
           "id": "chineseTypos",
           "name": "中文错别字列表",
@@ -184,7 +184,7 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "chinese-typo-checker-view",
+          "id": "nonsense-to-flow-view",
           "title": "中文错别字检查",
           "icon": "resources/icon.svg"
         }
